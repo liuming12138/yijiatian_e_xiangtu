@@ -3,7 +3,7 @@
 		<view class="app-1" style="background-image: url(../../../static/img/user/1.png);">
 			<view class="">
 				<view class=""><image src="../../../static/img/goods/p1.png" mode=""></image></view>
-				<text>郭冠敏</text>
+				<text>刘天帝</text>
 			</view>
 			<navigator url="../../setShop/setShop">我要开店</navigator>
 		</view>

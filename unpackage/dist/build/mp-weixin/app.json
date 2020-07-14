@@ -1,0 +1,51 @@
+{
+  "pages": [
+    "pages/tabBar/home/home",
+    "pages/tabBar/category/category",
+    "pages/tabBar/cart/cart",
+    "pages/tabBar/user/user",
+    "pages/login/login",
+    "pages/goods/goodsList",
+    "pages/goods/goods",
+    "pages/goods/ratings",
+    "pages/order/confirm",
+    "pages/tabBar/user/qrcode"
+  ],
+  "subPackages": [],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "米修在线",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#FFFFFF"
+  },
+  "tabBar": {
+    "color": "#333333",
+    "selectedColor": "#f06c7a",
+    "borderStyle": "black",
+    "backgroundColor": "#FFFFFF",
+    "list": [
+      {
+        "pagePath": "pages/tabBar/home/home",
+        "iconPath": "static/img/tabBar/home.png",
+        "selectedIconPath": "static/img/tabBar/home-on.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/tabBar/category/category",
+        "iconPath": "static/img/tabBar/category.png",
+        "selectedIconPath": "static/img/tabBar/category-on.png",
+        "text": "订单"
+      },
+      {
+        "pagePath": "pages/tabBar/user/user",
+        "iconPath": "static/img/tabBar/user.png",
+        "selectedIconPath": "static/img/tabBar/user-on.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "usingComponents": {
+    "page-status": "/components/status"
+  },
+  "sitemapLocation": "sitemap.json"
+}

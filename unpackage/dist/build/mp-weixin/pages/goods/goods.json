@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "商品",
+  "usingComponents": {
+    "goods-header": "/pages/goods/goodsHeader",
+    "popup-spec": "/components/popupSpec"
+  }
+}

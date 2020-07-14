@@ -1,0 +1,1 @@
+<view><view class="app-1"><image src="../../static/img/login/1.jpg" mode></image></view><view class="app-2"><button type="default" open-type="getUserInfo" withCredentials="true" lang="zh_CN" data-event-opts="{{[['getuserinfo',[['wxGetUserInfo',['$event']]]]]}}" bindgetuserinfo="__e">登录</button></view></view>

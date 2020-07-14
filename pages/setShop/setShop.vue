@@ -6,10 +6,8 @@
 				<text>请上传尺寸大于100x100px</text>
 			</view>
 			<view class="" @tap="onChooseImage(0)">
-				<text v-if="fromData.hand_id_card_photo.length <= 0">
-					点击
-					<br />
-					上传
+				<text v-if="fromData.hand_id_card_photo.length <= 0"  style="white-space:pre-wrap">
+					点击\n上传
 				</text>
 				<image v-else :src="fromData.hand_id_card_photo" mode=""></image>
 			</view>

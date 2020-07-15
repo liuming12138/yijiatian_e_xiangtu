@@ -6,10 +6,10 @@
 				<text>请上传尺寸大于100x100px</text>
 			</view>
 			<view class="" @tap="onChooseImage(0)">
-				<text v-if="fromData.hand_id_card_photo.length <= 0"  style="white-space:pre-wrap">
+				<text v-if="fromData.logo.length <= 0"  style="white-space:pre-wrap">
 					点击\n上传
 				</text>
-				<image v-else :src="fromData.hand_id_card_photo" mode=""></image>
+				<image v-else :src="fromData.logo" mode=""></image>
 			</view>
 		</view>
 		<view class="app-2">
@@ -27,12 +27,12 @@
 			</view>
 			<view class="">
 				<text>身份证号</text>
-				<input v-model="fromData.nickname" type="text" placeholder="请输入联系人身份证号（必填）" placeholder-class="on-inp" />
+				<input v-model="fromData.idCardNo" type="text" placeholder="请输入联系人身份证号（必填）" placeholder-class="on-inp" />
 			</view>
 			<view class="">
 				<text>行业分类</text>
 				<view class="">
-					<picker mode="selector" range-key="label" :range="industryList" @change="onChangeIndustry">
+					<picker mode="selector" range-key="name" :range="industryList" @change="onChangeIndustry">
 						<text>{{ industry }}</text>
 					</picker>
 					<image src="../../static/img/setShop/1.png" mode=""></image>
@@ -50,7 +50,7 @@
 			<view class="">
 				<text>店铺区域</text>
 				<view class="">
-					<picker mode="selector" range-key="label" :range="areaList" @change="onChangeArea">
+					<picker mode="selector" range-key="name" :range="areaList" @change="onChangeArea">
 						<text>{{ fromData.area }}</text>
 					</picker>
 					<image src="../../static/img/setShop/1.png" mode=""></image>
@@ -113,6 +113,7 @@
 <script>
 import LbPicker from '@/components/lb-picker';
 import interfaces from '../../utils/interfaces.js';
+import WxValidate from '../../utils/wx-validate/WxValidate'
 export default {
 	components: {
 		LbPicker
@@ -121,66 +122,16 @@ export default {
 		return {
 			state: 2,
 			industry: '请选择',
-			industryList: [
-				{
-					label: '连云港',
-					value: '1'
-				},
-				{
-					label: '海州区',
-					value: '2'
-				},
-				{
-					label: '连云区',
-					value: '3'
-				},
-				{
-					label: '赣榆区',
-					value: '4'
-				},
-				{
-					label: '灌南县',
-					value: '2'
-				}
-			],
-			areaList: [
-				// 地区的数据
-				{
-					label: '连云港',
-					value: '1'
-				},
-				{
-					label: '海州区',
-					value: '2'
-				},
-				{
-					label: '连云区',
-					value: '3'
-				},
-				{
-					label: '赣榆区',
-					value: '4'
-				},
-				{
-					label: '灌南县',
-					value: '2'
-				},
-				{
-					label: '灌云县',
-					value: '5'
-				},
-				{
-					label: '东海县',
-					value: '6'
-				}
-			],
+			industryList: [],
+			areaList: [],
 			fromData: {
-				hand_id_card_photo: '', //logo
+				logo: '', //logo
 				name: '',
 				contacts: '',
 				phone: '',
-				nickname: '', //身份证号
+				idCardNo: '', //身份证号
 				industry_id: 0,
+				'sysCodeInfoByIndustryId.id': '',
 				business_hours_data_begin1: '请选择',
 				area: '请选择',
 				address: '请选择',
@@ -193,7 +144,28 @@ export default {
 			}
 		};
 	},
-	onLoad() {},
+	onLoad() {
+        var _this = this;
+        _this.initValidate()
+        uni.request({
+            url: this.interfaces.getCodePidList,
+            data:{pid:100027},
+            success: (res) => {
+                console.log(res)
+                _this.industryList = res.data.data;
+                console.log(_this.industryList)
+            }
+        })
+        uni.request({
+            url: this.interfaces.getPlaceList,
+            data:{parentId:320700000000},
+            success: (res) => {
+                console.log(res)
+                _this.areaList = res.data.data;
+                console.log(_this.areaList)
+            }
+        })
+    },
 	onShow() {
 		const chooseLocation = requirePlugin('chooseLocation');
 		const location = chooseLocation.getLocation();
@@ -210,7 +182,7 @@ export default {
 			var _this = this;
 			uni.chooseImage({
 				count: 1,
-				sizeType: ['compressed'],
+				// sizeType: ['compressed'],
 				success(res) {
 					var imgFiles = res.tempFilePaths[0];
 					var tempFiles = res.tempFiles[0];
@@ -218,15 +190,15 @@ export default {
 						mask: true,
 						title: '上传中'
 					});
-					if (tempFiles.size / (1024 * 1024) > 1) {
-						console.log(111);
-						_this.onCompression(tempFiles, function(data, files) {
-							_this.onUpImage(data, type);
-						});
-					} else {
-						console.log(222);
-						_this.onUpImage(imgFiles, type);
-					}
+					// if (tempFiles.size / (1024 * 1024) > 10) {
+					// 	console.log(111);
+					// 	_this.onCompression(tempFiles, function(data, files) {
+					// 		_this.onUpImage(data, type);
+					// 	});
+					// } else {
+					// 	console.log(222);
+					// }
+                    _this.onUpImage(imgFiles, type);
 				}
 			});
 		},
@@ -275,7 +247,7 @@ export default {
 					uni.hideLoading();
 					console.log(JSON.parse(res.data));
 					if (type == 0) {
-						_this.fromData.hand_id_card_photo = interfaces.tempUrl + JSON.parse(res.data).imgUrl;
+						_this.fromData.logo = interfaces.tempUrl + JSON.parse(res.data).imgUrl;
 					} 
 					else if (type == 1) {
 						_this.fromData.id_card_photo_positive = interfaces.tempUrl + JSON.parse(res.data).imgUrl;
@@ -310,11 +282,22 @@ export default {
 		//提交
 		formSubmit() {
 			console.log(this.fromData);
+            // 传入表单数据，调用验证方法
+            if (!this.WxValidate.checkForm(this.fromData)) {
+            	const error = this.WxValidate.errorList[0]
+            	uni.showModal({
+            	    title:"提示",
+            	    content:error.msg,
+            	})
+            	return false
+            }
+            
 		},
 		//行业分类
 		onChangeIndustry(e) {
-			this.fromData.industry_id = e.detail.value;
-			this.industry = this.industryList[e.detail.value].label;
+			this.fromData.industry_id = e.detail.id;
+			this.fromData.sysCodeInfoByIndustryId = e.detail.id;
+			this.industry = this.industryList[e.detail.value].name;
 		},
 		//经营时间
 		onChangeDate(e) {
@@ -323,8 +306,60 @@ export default {
 		},
 		//店铺区域
 		onChangeArea(e) {
-			this.fromData.area = this.industryList[e.detail.value].label;
-		}
+			this.fromData.area = this.areaList[e.detail.value].name;
+		},
+        initValidate() {
+        	// 验证字段的规则
+        	const rules = {
+        		logo: {
+        			required: true,
+        		},
+        		name: {
+        			required: true,
+        		},
+        		mobilePhone: {
+        			required: true,
+        			tel: true,
+        		},
+        		contacts: {
+        			required: true,
+        		},
+        		idCardNo: {
+        			required: true,
+                    idcard:true
+        		},
+        		'sysCodeInfoByIndustryId.id': {
+        			required: true,
+        		}
+        	}
+        
+        	// 验证字段的提示信息，若不传则调用默认的信息
+        	const messages = {
+        		logo: {
+        			required: "请选择店铺LOGO",
+        		},
+        		name: {
+        			required: "请输入姓名",
+        		},
+        		mobilePhone: {
+        			required: "请输入您的联系方式",
+        			tel: "请输入正确的手机号码",
+        		},
+        		contacts: {
+        			required: "请输入联系人",
+        		},
+        		idCardNo: {
+        			required: "请输入身份证号码",
+        			idcard: "请输入正确的身份证号码",
+        		},
+        		'sysCodeInfoByIndustryId.id': {
+        			required: "请选择行业分类",
+        		}
+        	}
+        
+        	// 创建实例对象
+        	this.WxValidate = new WxValidate(rules, messages)
+        },
 	}
 };
 </script>

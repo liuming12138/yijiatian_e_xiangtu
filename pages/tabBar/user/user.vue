@@ -2,10 +2,10 @@
 	<view>
 		<view class="app-1" style="background-image: url(../../../static/img/user/1.png);">
 			<view class="">
-				<view class=""><image src="../../../static/img/goods/p1.png" mode=""></image></view>
-				<text>刘天帝</text>
+				<view class=""><image :src="user.headImg" mode=""></image></view>
+				<text>{{user.name}}</text>
 			</view>
-			<navigator url="../../setShop/setShop">我要开店</navigator>
+			<navigator url="../../setShop/setShop" v-if="!dealerExist">我要开店</navigator>
 		</view>
 		<view class="app-2">
 			<view class="app-21">
@@ -14,15 +14,15 @@
 					<text>我的收藏</text>
 				</view>
 				<view class="">
-					<text>28</text>
+					<text>{{user.money}}</text>
 					<text>余额</text>
 				</view>
 				<view class="">
-					<text>540</text>
+					<text>{{user.integral}}</text>
 					<text>积分</text>
 				</view>
 				<view class="">
-					<text>15</text>
+					<text>{{couponCount}}</text>
 					<text>优惠券</text>
 				</view>
 			</view>
@@ -92,10 +92,27 @@ export default {
 	data() {
 		return {
 			// 个人信息
-			user: {}
+			user: {},
+			dealerExist: false,
+			couponCount: 0,
 		};
 	},
-	onLoad() {},
+	onLoad() {
+        let _this = this;
+        this.user = uni.getStorageSync('userInfo');
+        console.log(this.user);
+        this.request({
+        	url: this.interfaces.getUserData,
+            data:{miniOpenid:uni.getStorageSync("smallOpenid")},
+        	success: res => {
+        		console.log(res);
+        		_this.user = res.userData;
+        		_this.dealerExist = res.dealerExist;
+        		_this.couponCount = res.couponCount;
+                console.log(this)
+        	}
+        });
+    },
 	methods: {}
 };
 </script>

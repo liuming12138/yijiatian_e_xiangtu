@@ -11,6 +11,9 @@
 		},
 		onHide: function() {
 			// console.log('App Hide')
+		},
+		onLoad: function() {
+			// console.log('App Load')
 		}
 	}
 </script>

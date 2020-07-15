@@ -9,7 +9,7 @@
 		<view class="swiper">
 			<view class="swiper-box">
 				<swiper circular="true" autoplay="true" @change="swiperChange">
-					<swiper-item v-for="(swiper, index) in swiperList" :key="index" @tap="onBanner(swiper)"><image :src="swiper.img"></image></swiper-item>
+					<swiper-item v-for="(swiper, index) in swiperList" :key="index" @tap="onBanner(swiper)"><image :src="swiper.imageUrl"></image></swiper-item>
 				</swiper>
 			</view>
 		</view>
@@ -60,14 +60,14 @@
 			</view>
 			<view class="bill-2">
 				<navigator class="bill-21" url="">
-					<image src="../../../static/img/home/13.png" mode=""></image>
+					<image :src="groupCommodityDealer.logo" mode=""></image>
 					<view class="">
-						<text>海底捞火锅(连云港吾悦广...海底捞火锅(连云港吾悦广...</text>
+						<text>{{groupCommodityDealer.name}}</text>
 						<view class="">
-							<text class="tab">美食</text>
-							<text class="ard">海州区为民路吾悦广场4楼 ... 海州区为民路吾悦广场4楼 ...</text>
+							<text class="tab">{{groupCommodityDealer.sysCodeInfoByIndustryId.name}}</text>
+							<text class="ard">{{groupCommodityDealer.address}}</text>
 						</view>
-						<text>周一至周日 09:30-22:30</text>
+						<text>周一至周日 {{groupCommodityDealer.businessHoursDataBegin1|subtime}}-{{groupCommodityDealer.businessHoursDataEnd1|subtime}} {{groupCommodityDealer.businessHoursDataBegin2|subtime}}-{{groupCommodityDealer.businessHoursDataEnd2|subtime}}</text>
 					</view>
 					<view class="">
 						<image src="../../../static/img/home/14.png" mode=""></image>
@@ -75,15 +75,15 @@
 					</view>
 				</navigator>
 				<view class="bill-22">
-					<navigator url="" v-for="(item, index) in 3" :key="index">
-						<image src="../../../static/img/home/15.png" mode=""></image>
-						<text>精品火锅精品火锅牛排精品火锅牛排牛排</text>
-						<view class="">
+					<navigator url="" v-for="(item, index) in groupCommodityList" :key="index">
+                        <image :src="item.commodityInfo.adjunct" mode=""></image>
+                        <text>{{item.commodityInfo.name}}</text>
+                        <view class="">
 							<view class="">
 								<text>￥</text>
-								<text>56.6</text>
+								<text>{{item.groupPrice}}</text>
 							</view>
-							<text>￥56.00</text>
+							<text>￥{{item.commodityInfo.price}}</text>
 						</view>
 					</navigator>
 				</view>
@@ -96,21 +96,21 @@
 				<navigator url="">查看更多</navigator>
 			</view>
 			<view class="piece-2">
-				<view v-for="(item,index) in 5" :key="index">
-					<image src="../../../static/img/home/18.png" mode=""></image>
+				<view v-for="(item,index) in haggleCommodityList" :key="index">
+					<image :src="item.commodityInfo.adjunct" mode=""></image>
 					<view class="piece-21">
 						<view class="">
-							<text>喜茶喜茶喜茶喜茶喜茶(大洋百货店)</text>
+							<text>{{item.commodityInfo.name}}</text>
 							<text>468km</text>
 						</view>
-						<text>芝芝莓喜茶喜茶喜茶喜茶莓</text>
+						<text>{{item.commodityInfo.title}}</text>
 						<view class="">
 							<view class="">
 								<view class="">
 									<text>￥</text>
-									<text>888</text>
+									<text>{{item.commodityInfo.price}}</text>
 								</view>
-								<text>￥998</text>
+								<text>￥{{item.commodityInfo.marketPrice}}</text>
 							</view>
 							<text>发起砍价</text>
 						</view>
@@ -164,8 +164,11 @@ export default {
 					value: '6'
 				}
 			],
+			currentSwiper: 0,
 			swiperList: [], // 轮播图片
-			currentSwiper: 0
+			haggleCommodityList: [], // 砍价产品
+			groupCommodityList: [], // 惊爆产品
+			groupCommodityDealer: {}, // 惊爆店铺
 		};
 	},
 	components: {
@@ -184,8 +187,6 @@ export default {
 	},
 	onLoad() {
 		this.isCanUse = uni.getStorageSync('isCanUse');
-		getApp().globalData.userInfo = uni.getStorageSync('userInfo');
-		console.log(getApp().globalData.userInfo);
 		if (this.isCanUse || this.isCanUse.toString().length < 1) {
 			uni.navigateTo({
 				url: '../../login/login'
@@ -193,6 +194,14 @@ export default {
 		}
 		this.initData();
 	},
+    filters:{
+        subtime(value){
+            if (!value){
+                return "";
+            }
+            return value.substr(0,5)
+        }
+    },
 	methods: {
 		//地区选择
 		handleConfirm(item) {
@@ -224,12 +233,39 @@ export default {
 		},
 		initData() {
 			this.request({
-				url: interfaces.getMallData,
+				url: interfaces.loadAdvertisingData,
 				success: res => {
 					console.log(res);
-					this.swiperList = res.data.swiperList;
-					this.categoryList = res.data.categoryList;
-					this.promotion = res.data.promotion;
+					this.swiperList = res.data;
+				}
+			});
+			this.request({
+				url: interfaces.loadCommodityHaggleInfoData,
+                data:{"haggleState":2},
+				success: res => {
+					console.log(res);
+					this.haggleCommodityList = res.data;
+				}
+			});
+			this.request({
+				url: interfaces.loadCommodityGroupInfoData,
+                data:{"groupState":2},
+				success: res => {
+					console.log(res);
+					this.groupCommodityList = res.data;
+                    if (res.data.length>0) {
+                        var groupCommodityDealer = res.data[0].commodityInfo.dealerInfo;
+                        this.request({
+                        	url: interfaces.loadDealerDetail,
+                            data:{id:groupCommodityDealer.id},
+                        	success: res => {
+                        		console.log(res);
+                                if (res.flag==1) {
+                                    this.groupCommodityDealer = res.data;
+                                }
+                        	}
+                        });
+                    }
 				}
 			});
 		},
@@ -402,6 +438,7 @@ export default {
 				margin-right: 0;
 			}
 			navigator {
+                width: 33%;
 				margin-right: 22upx;
 				display: block;
 				overflow: hidden;

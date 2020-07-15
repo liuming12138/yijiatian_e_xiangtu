@@ -30,13 +30,20 @@ export default {
 						data: data,
 						title:'登录中...',
 						success: res => {
+                            uni.setStorageSync('smallOpenid',res.userInfo.openid)
 							let data =e.detail.userInfo
 							data.smallOpenid = res.userInfo.openid
 							data.headImg = e.detail.userInfo.avatarUrl
 							data.sex = e.detail.userInfo.gender
 							data.invitationCode = ''
 							_this.onSetRegistration(data)
-						}
+						},
+                        fail(e) {
+                            uni.hideLoading()
+                            uni.showToast({
+                                title:"登录失败"
+                            })
+                        }
 					});
 				}
 			});
@@ -51,10 +58,11 @@ export default {
 					uni.setStorageSync('isCanUse',false)
 					uni.setStorageSync('userInfo',res.userData)
 					uni.hideLoading()
-					uni.navigateTo({
-						url:'../tabBar/home/home'
-					})
-				}
+                    uni.navigateBack()
+                    // uni.switchTab({
+                    //     url:'../tabBar/home/home'
+                    // })
+				},
 			});
 		},
 	}
